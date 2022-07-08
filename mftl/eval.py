@@ -6,6 +6,7 @@
 #  - function definition
 #  - function call
 #  - if statement
+#  - one for loop
 #  - assignment statement w/ pattern matching
 #  - dictionary, but only as an optimization
 #  - print statement
@@ -55,6 +56,7 @@ def var_new(id):
 
 def var_eval(var, env):
   (_, id) = var
+  print(">>>> var_eval id =", id, "value =", env_lookup(env, id))
   return (env_lookup(env, id), env)
 
 def var_test():
@@ -108,15 +110,16 @@ def seq_new(exprs):
   return ('Seq', exprs)
 
 # iterative
-#def seq_eval(seqExpr, env):
-#  (_, exprs) = seqExpr
-#  res = None
-#  for expr in exprs:
-#    (res, env) = evaluate(expr, env)
-#  return (res, env)
-
-# recursive
 def seq_eval(seqExpr, env):
+  (_, exprs) = seqExpr
+  res = None
+  for expr in exprs:
+    (res, env) = evaluate(expr, env)
+  return (res, env)
+
+# recursive (unused)
+# TODO this has an off-by-one problem
+def seq_eval_X(seqExpr, env):
   (_, exprs) = seqExpr
   return seq_eval_aux(exprs, len(exprs), 0, None, env)
 
@@ -164,7 +167,7 @@ def app_eval(app, env):
             lexEnv1 = env_bind(param, argVal, lexEnv)
             (res, _) = evaluate(body, lexEnv1)
             return (res, env)  # which env? env, env1, or env2
-  raise Exception("object is not applyable", abstr)
+    raise Exception("object is not applyable", abstr)
 
 def app_test():
   env0 = env_new()
@@ -188,6 +191,7 @@ def app_test_lexEnv():
                   ('App', ('Var', 'f'), True)))
   (val, env1) = evaluate(expr, env_new())
   print("val =", val)
+  print("Env:")
   env_show(env1)
 
 # global eval function
@@ -206,5 +210,10 @@ def evaluate(obj, env=env_new()):
   if isinstance(obj, tuple):
     exprType = obj[0]
     evalFunc = evalFuncs[exprType]
-    return evalFunc(obj, env)
+    res = evalFunc(obj, env)
+    (foo1, foo2) = res
+    return res
   return (obj, env)
+
+if __name__ == '__main__':
+    app_test_lexEnv()
